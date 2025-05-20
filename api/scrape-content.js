@@ -2,6 +2,8 @@ import axios from 'axios';
 import cheerio from 'cheerio';
 
 export const handler = async function(event, context) {
+  console.log('Function started with event:', JSON.stringify(event, null, 2));
+  
   // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -11,6 +13,7 @@ export const handler = async function(event, context) {
 
   // Handle OPTIONS request
   if (event.httpMethod === 'OPTIONS') {
+    console.log('Handling OPTIONS request');
     return {
       statusCode: 200,
       headers,
@@ -20,6 +23,7 @@ export const handler = async function(event, context) {
 
   // Only allow POST
   if (event.httpMethod !== 'POST') {
+    console.log('Invalid method:', event.httpMethod);
     return {
       statusCode: 405,
       headers,
@@ -32,6 +36,7 @@ export const handler = async function(event, context) {
     const { url } = JSON.parse(event.body);
     
     if (!url) {
+      console.log('No URL provided');
       return {
         statusCode: 400,
         headers,
@@ -43,6 +48,7 @@ export const handler = async function(event, context) {
     let parsedUrl;
     try {
       parsedUrl = new URL(url);
+      console.log('Parsed URL:', parsedUrl.toString());
     } catch (urlError) {
       console.error('Invalid URL format:', urlError);
       return {
@@ -70,6 +76,8 @@ export const handler = async function(event, context) {
       'Upgrade-Insecure-Requests': '1'
     };
 
+    console.log('Making request with headers:', requestHeaders);
+
     // Fetch the webpage content
     const response = await axios.get(url, {
       headers: requestHeaders,
@@ -79,9 +87,11 @@ export const handler = async function(event, context) {
     });
 
     console.log('Received response with status:', response.status);
+    console.log('Response headers:', response.headers);
 
     // Handle non-success status codes
     if (response.status !== 200) {
+      console.log('Non-200 status code:', response.status);
       return {
         statusCode: 400,
         headers,
@@ -97,6 +107,8 @@ export const handler = async function(event, context) {
       normalizeWhitespace: true
     });
 
+    console.log('HTML loaded into cheerio');
+
     // Remove unwanted elements
     $('script, style, noscript, svg, iframe, img, nav, footer, header, [role="banner"], [role="navigation"]').remove();
     
@@ -104,6 +116,8 @@ export const handler = async function(event, context) {
     const companyName = $('meta[property="og:site_name"]').attr('content') || 
                        $('meta[name="application-name"]').attr('content') || 
                        parsedUrl.hostname.replace(/^www\./, '').split('.')[0];
+    
+    console.log('Extracted company name:', companyName);
     
     // Extract content
     const extractedContent = {
@@ -221,6 +235,15 @@ export const handler = async function(event, context) {
     };
   } catch (error) {
     console.error('Error scraping content:', error);
+    console.error('Error details:', {
+      message: error.message,
+      code: error.code,
+      response: error.response ? {
+        status: error.response.status,
+        statusText: error.response.statusText,
+        headers: error.response.headers
+      } : null
+    });
     
     // Handle specific error cases
     if (error.code === 'ECONNREFUSED') {
