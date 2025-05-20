@@ -18,8 +18,8 @@ export async function runAudienceResearch({ url, rawText }: AudienceResearchInpu
     if (url) {
       try {
         console.log(`[AdSightful Agent] Starting initial analysis of: ${url}`);
-        // Use our server-side scraping endpoint with the full Netlify function URL
-        const response = await axios.post('/.netlify/functions/scrape-content', { url }, { 
+        // Use our server-side scraping endpoint using the API route that will be redirected to Netlify functions
+        const response = await axios.post('/api/scrape-content', { url }, { 
           timeout: 30000, // 30 second timeout
           headers: {
             'Content-Type': 'application/json'
@@ -264,7 +264,7 @@ Your analysis must be detailed, specific, and tailored exactly to this company -
                         description: 'The main objection or barrier at the awareness stage'
                       },
                       considerationObjection: {
-                        type: 'string',
+                        type: 'string', 
                         description: 'The main objection or barrier at the consideration stage'
                       },
                       decisionObjection: {
