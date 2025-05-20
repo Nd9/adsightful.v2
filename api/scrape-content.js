@@ -1,7 +1,7 @@
-import axios from 'axios';
-import cheerio from 'cheerio';
+const axios = require('axios');
+const cheerio = require('cheerio');
 
-export const handler = async function(event, context) {
+exports.handler = async function(event, context) {
   console.log('Function started with event:', JSON.stringify(event, null, 2));
   
   // Set CORS headers
