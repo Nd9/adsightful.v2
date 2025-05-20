@@ -18,10 +18,12 @@ export async function runAudienceResearch({ url, rawText }: AudienceResearchInpu
     if (url) {
       try {
         console.log(`[AdSightful Agent] Starting initial analysis of: ${url}`);
-        // Use the configured API endpoint
-        const response = await axios.post(`${config.apiBaseUrl}/scrape-content`, { url }, { 
-          timeout: config.timeout,
-          headers: config.headers
+        // Use our server-side scraping endpoint
+        const response = await axios.post('/api/scrape-content', { url }, { 
+          timeout: 30000, // 30 second timeout
+          headers: {
+            'Content-Type': 'application/json'
+          }
         });
         
         if (response.data && response.data.content) {
