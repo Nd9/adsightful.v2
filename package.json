@@ -2,6 +2,7 @@
   "name": "adsightful-react",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "proxy": "http://localhost:3001",
   "dependencies": {
     "@apollo/client": "^3.13.8",
@@ -42,7 +43,7 @@
   },
   "scripts": {
     "start": "vite --port 3000",
-    "build": "vite build",
+    "build": "NODE_ENV=production vite build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
