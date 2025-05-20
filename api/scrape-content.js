@@ -1,7 +1,7 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+import axios from 'axios';
+import cheerio from 'cheerio';
 
-exports.handler = async function(event, context) {
+export const handler = async function(event, context) {
   // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -28,6 +28,7 @@ exports.handler = async function(event, context) {
   }
 
   try {
+    console.log('Received request body:', event.body);
     const { url } = JSON.parse(event.body);
     
     if (!url) {
@@ -43,6 +44,7 @@ exports.handler = async function(event, context) {
     try {
       parsedUrl = new URL(url);
     } catch (urlError) {
+      console.error('Invalid URL format:', urlError);
       return {
         statusCode: 400,
         headers,
@@ -52,8 +54,10 @@ exports.handler = async function(event, context) {
       };
     }
 
+    console.log('Attempting to fetch URL:', url);
+    
     // Set up browser-like headers
-    const headers = {
+    const requestHeaders = {
       'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
       'Accept-Language': 'en-US,en;q=0.9',
@@ -68,11 +72,13 @@ exports.handler = async function(event, context) {
 
     // Fetch the webpage content
     const response = await axios.get(url, {
-      headers,
+      headers: requestHeaders,
       timeout: 30000,
       maxContentLength: 10 * 1024 * 1024,
       validateStatus: status => status < 500
     });
+
+    console.log('Received response with status:', response.status);
 
     // Handle non-success status codes
     if (response.status !== 200) {
@@ -113,6 +119,14 @@ exports.handler = async function(event, context) {
       aboutContent: $('.about, #about, [data-section="about"], section:contains("About")').map((_, el) => $(el).text().trim()).get(),
       productContent: $('.products, .services, #products, #services, [data-section="products"], [data-section="services"]').map((_, el) => $(el).text().trim()).get(),
     };
+
+    console.log('Extracted content structure:', {
+      title: extractedContent.title,
+      h1Count: extractedContent.h1.length,
+      h2Count: extractedContent.h2.length,
+      paragraphCount: extractedContent.paragraphs.length,
+      mainContentCount: extractedContent.mainContent.length
+    });
 
     // Build structured content
     let structuredContent = `## COMPANY ANALYSIS REPORT ##\n\n`;
@@ -188,6 +202,7 @@ exports.handler = async function(event, context) {
     
     // Check if we have enough content
     if (structuredContent.length < 300) {
+      console.log('Not enough content extracted:', structuredContent.length);
       return {
         statusCode: 400,
         headers,
@@ -196,6 +211,8 @@ exports.handler = async function(event, context) {
         })
       };
     }
+    
+    console.log('Successfully extracted content of length:', structuredContent.length);
     
     return {
       statusCode: 200,
