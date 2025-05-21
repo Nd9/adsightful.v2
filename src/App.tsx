@@ -11,6 +11,7 @@ import CreativeMetrics from './components/CreativeMetrics';
 import AudienceResearchAgent from './components/campaignPlanner/AudienceResearchAgent';
 import CreativeAssetLibrary from './components/CreativeAssetLibrary';
 import WelcomeModal from './components/auth/WelcomeModal';
+import TestFunctions from './components/TestFunctions';
 import { authService } from './services/auth';
 
 // Define a custom track function since @vercel/analytics doesn't export 'track'
@@ -106,6 +107,8 @@ const App: React.FC = () => {
         return <CreativeAssetLibrary />; // Use our new CreativeAssetLibrary component
       case 'taxonomy-utm':
         return <AICampaignPlanner pageName="Taxonomy and UTM Builder" />;
+      case 'test-functions':
+        return <TestFunctions />; // Our new test component
       default:
         return <Dashboard />; // Still using Dashboard component but for 'campaign-metrics' page
     }

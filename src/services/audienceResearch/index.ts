@@ -7,6 +7,8 @@ import { config } from '../../config/api';
  */
 export async function runAudienceResearch({ url, rawText }: AudienceResearchInput): Promise<AudienceBrief> {
   try {
+    console.log('[AdSightful Debug] Starting audience research with parameters:', { url, hasRawText: !!rawText });
+    
     if (!url && !rawText) {
       throw new Error('Either URL or raw text must be provided');
     }
@@ -19,31 +21,70 @@ export async function runAudienceResearch({ url, rawText }: AudienceResearchInpu
       try {
         console.log(`[AdSightful Agent] Starting initial analysis of: ${url}`);
         
-        // Try the simple scraping endpoint first
-        const response = await axios.post('/api/simple-scrape', { url }, { 
-          timeout: 30000, // 30 second timeout
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-        
-        if (response.data && response.data.content) {
-          contentToAnalyze = response.data.content;
-          console.log(`[AdSightful Agent] Successfully retrieved ${contentToAnalyze.length} characters of content`);
+        // Try different endpoint patterns to find what works
+        try {
+          // Try the simple-scrape endpoint
+          console.log('[AdSightful Debug] Trying /api/simple-scrape endpoint...');
           
-          // Phase 1: Preliminary company analysis to understand the business
-          console.log(`[AdSightful Agent] Phase 1: Conducting preliminary business analysis...`);
-          companyData = await runPreliminaryAnalysis(contentToAnalyze);
-          console.log(`[AdSightful Agent] Business category identified: ${companyData.industry}`);
-        } else {
-          throw new Error('No content returned from scraping service');
+          const response = await axios.post('/api/simple-scrape', { url }, { 
+            timeout: 30000,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          console.log('[AdSightful Debug] Response received from /api/simple-scrape:', { 
+            status: response.status, 
+            hasContent: !!response.data?.content
+          });
+          
+          if (response.data && response.data.content) {
+            contentToAnalyze = response.data.content;
+            console.log(`[AdSightful Agent] Successfully retrieved ${contentToAnalyze.length} characters of content`);
+          } else {
+            throw new Error('No content returned from scraping service');
+          }
+        } catch (scrapeError) {
+          console.error('[AdSightful Debug] Error with /api/simple-scrape:', scrapeError);
+          
+          // Try direct Netlify function URL as a fallback
+          console.log('[AdSightful Debug] Trying direct /.netlify/functions/simple-scrape endpoint...');
+          
+          const response = await axios.post('/.netlify/functions/simple-scrape', { url }, { 
+            timeout: 30000,
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          });
+          
+          console.log('[AdSightful Debug] Response received from /.netlify/functions/simple-scrape:', { 
+            status: response.status, 
+            hasContent: !!response.data?.content
+          });
+          
+          if (response.data && response.data.content) {
+            contentToAnalyze = response.data.content;
+            console.log(`[AdSightful Agent] Successfully retrieved ${contentToAnalyze.length} characters of content from direct Netlify function`);
+          } else {
+            throw new Error('No content returned from direct Netlify function');
+          }
         }
-      } catch (error) {
-        console.error('Error fetching URL content:', error);
+        
+        // Phase 1: Preliminary company analysis to understand the business
+        console.log(`[AdSightful Agent] Phase 1: Conducting preliminary business analysis...`);
+        companyData = await runPreliminaryAnalysis(contentToAnalyze);
+        console.log(`[AdSightful Agent] Business category identified: ${companyData.industry}`);
+      } catch (error: any) {
+        console.error('[AdSightful Debug] Error fetching URL content:', error);
+        console.error('[AdSightful Debug] Error details:', { 
+          message: error.message,
+          status: error.response?.status,
+          data: error.response?.data
+        });
         
         // If we have raw text as a backup, use it
         if (rawText) {
-          console.log('Using provided raw text since URL scraping failed');
+          console.log('[AdSightful Debug] Using provided raw text since URL scraping failed');
           contentToAnalyze = rawText;
           companyData = await runPreliminaryAnalysis(contentToAnalyze);
         } else {
@@ -58,8 +99,11 @@ export async function runAudienceResearch({ url, rawText }: AudienceResearchInpu
     // Get the OpenAI API key from environment variables
     const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
     if (!OPENAI_API_KEY) {
+      console.error('[AdSightful Debug] OpenAI API key not found in environment variables');
       throw new Error('OpenAI API key is required. Please add your API key in the .env file as VITE_OPENAI_API_KEY.');
     }
+    
+    console.log('[AdSightful Debug] OpenAI API key found, first 10 chars:', OPENAI_API_KEY.substring(0, 10) + '...');
     
     // Enhanced system prompt for better company-specific analysis
     const systemPrompt = `You are AdSightful, an expert marketing AI agent specialized in audience research and advertising strategy. 

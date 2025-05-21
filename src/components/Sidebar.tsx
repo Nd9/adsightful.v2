@@ -215,6 +215,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleSidebar, setCurren
             <FontAwesomeIcon icon={faTags} className="h-5 w-5 mr-3 text-gray-500" />
             <span className="nav-text">Taxonomy creator</span>
           </button>
+          
+          {/* Test Functions Page - Development only */}
+          <button 
+            className={`flex items-center w-full px-4 py-3 ${currentPage === 'test-functions' ? 'active-nav-item' : 'text-gray-600 hover:bg-gray-100'} rounded-lg focus-visible transition-colors duration-150 text-left`}
+            onClick={() => setCurrentPage('test-functions')}
+          >
+            <FontAwesomeIcon icon={faTools} className="h-5 w-5 mr-3 text-gray-500" />
+            <span className="nav-text">Test Functions</span>
+          </button>
         </div>
       </nav>
       
