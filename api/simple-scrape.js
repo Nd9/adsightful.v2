@@ -6,6 +6,13 @@ exports.handler = async function(event, context) {
   console.log('Event HTTP Method:', event.httpMethod);
   console.log('Path:', event.path);
   
+  // Check for OpenAI API key
+  const hasOpenAIKey = !!process.env.VITE_OPENAI_API_KEY;
+  console.log('Has OpenAI API Key:', hasOpenAIKey);
+  if (hasOpenAIKey) {
+    console.log('OpenAI API Key prefix:', process.env.VITE_OPENAI_API_KEY.substring(0, 10) + '...');
+  }
+  
   // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',

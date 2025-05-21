@@ -5,12 +5,22 @@ exports.handler = async function(event, context) {
     'Content-Type': 'application/json'
   };
 
+  // Check for OpenAI API key
+  const hasOpenAIKey = !!process.env.VITE_OPENAI_API_KEY;
+  const openAIKeyFirstChars = hasOpenAIKey ? 
+    process.env.VITE_OPENAI_API_KEY.substring(0, 10) + '...' : 
+    'not found';
+
   // Get environment info
   const environment = {
     nodeVersion: process.version,
     netlifyEnv: process.env.NETLIFY || 'not set',
     netlifyDevEnv: process.env.NETLIFY_DEV || 'not set',
     currentTime: new Date().toISOString(),
+    openAI: {
+      hasKey: hasOpenAIKey,
+      keyPrefix: openAIKeyFirstChars
+    },
     availableModules: {
       axios: !!require.resolve('axios'),
       cheerio: tryResolve('cheerio'),
