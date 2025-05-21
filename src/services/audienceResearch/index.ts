@@ -18,8 +18,9 @@ export async function runAudienceResearch({ url, rawText }: AudienceResearchInpu
     if (url) {
       try {
         console.log(`[AdSightful Agent] Starting initial analysis of: ${url}`);
-        // Use our server-side scraping endpoint using the API route that will be redirected to Netlify functions
-        const response = await axios.post('/api/scrape-content', { url }, { 
+        
+        // Try the simple scraping endpoint first
+        const response = await axios.post('/api/simple-scrape', { url }, { 
           timeout: 30000, // 30 second timeout
           headers: {
             'Content-Type': 'application/json'

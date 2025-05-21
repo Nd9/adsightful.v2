@@ -6,6 +6,8 @@
 [build.environment]
   NODE_VERSION = "20.11.1"
   NPM_FLAGS = "--legacy-peer-deps"
+  # Enable more verbose function logs
+  DEBUG = "*"
 
 # Handle SPA routing
 [[redirects]]
@@ -22,8 +24,10 @@
 [functions]
   directory = "api"
   node_bundler = "esbuild"
-  external_node_modules = ["cheerio", "axios"]
+  # Include all necessary dependencies
+  external_node_modules = ["cheerio", "axios", "parse5", "parse5-htmlparser2-tree-adapter", "domutils", "htmlparser2", "domhandler", "entities", "css-select", "css-what"]
 
 [functions.scrape-content]
   node_bundler = "esbuild"
-  external_node_modules = ["cheerio", "axios"] 
+  # Include all necessary dependencies for cheerio
+  external_node_modules = ["cheerio", "axios", "parse5", "parse5-htmlparser2-tree-adapter", "domutils", "htmlparser2", "domhandler", "entities", "css-select", "css-what"] 
