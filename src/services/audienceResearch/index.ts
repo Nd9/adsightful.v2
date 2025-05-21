@@ -114,7 +114,7 @@ Your analysis must be detailed, specific, and tailored exactly to this company -
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: 'gpt-4.1-2025-04-14',
+        model: 'gpt-4',
         messages: [
           {
             role: 'system',
@@ -696,7 +696,7 @@ async function runPreliminaryAnalysis(content: string): Promise<any> {
     const response = await axios.post(
       'https://api.openai.com/v1/chat/completions',
       {
-        model: 'gpt-3.5-turbo',  // Using a faster model for preliminary analysis
+        model: 'gpt-4',  // Using a more capable model for analysis
         messages: [
           {
             role: 'system',
