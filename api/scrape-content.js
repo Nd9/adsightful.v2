@@ -2,7 +2,24 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 exports.handler = async function(event, context) {
-  console.log('Function started with event:', JSON.stringify(event, null, 2));
+  // Add detailed logging
+  console.log('===== SCRAPE CONTENT FUNCTION INVOKED =====');
+  console.log('Event:', JSON.stringify(event, null, 2));
+  console.log('Context:', JSON.stringify(context, null, 2));
+  console.log('HTTP Method:', event.httpMethod);
+  console.log('Headers:', JSON.stringify(event.headers, null, 2));
+  console.log('Path:', event.path);
+  console.log('Raw body:', event.body);
+  
+  // Parse body explicitly to avoid potential issues
+  let requestBody;
+  try {
+    requestBody = event.body ? JSON.parse(event.body) : {};
+    console.log('Parsed body:', JSON.stringify(requestBody, null, 2));
+  } catch (parseError) {
+    console.error('Error parsing request body:', parseError);
+    requestBody = {};
+  }
   
   // Set CORS headers
   const headers = {
@@ -32,8 +49,7 @@ exports.handler = async function(event, context) {
   }
 
   try {
-    console.log('Received request body:', event.body);
-    const { url } = JSON.parse(event.body);
+    const { url } = requestBody;
     
     if (!url) {
       console.log('No URL provided');
